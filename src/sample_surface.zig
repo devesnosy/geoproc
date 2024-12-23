@@ -336,6 +336,7 @@ pub fn main() !void {
     for (0..num_points) |_| {
         const cdf_y = rand.float(f32);
         const ti = upper_bound(f32, tris_areas, cdf_y);
+        std.debug.assert(ti < tris.items.len);
         const t = tris.items[ti];
 
         const iu: [2]f32 = .{ rand.float(f32), rand.float(f32) };
