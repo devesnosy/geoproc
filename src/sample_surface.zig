@@ -201,6 +201,7 @@ fn read_token(reader: anytype, token: *std.ArrayList(u8)) !void {
     }
 }
 
+/// Return first element in array that is larger than val
 fn upper_bound(comptime T: type, arr: []const T, val: T) usize {
     if (arr.len == 0) return 0;
     var first: usize = 0;
