@@ -202,17 +202,18 @@ fn read_token(reader: anytype, token: *std.ArrayList(u8)) !void {
 }
 
 fn upper_bound(comptime T: type, arr: []const T, val: T) usize {
-    var start: usize = 0;
-    var end = arr.len;
-    while (start < end) {
-        const mid = (start + end) / 2;
-        if (val < arr[mid]) {
-            end = mid;
+    if (arr.len == 0) return 0;
+    var first: usize = 0;
+    var last = arr.len - 1;
+    while (first < last) {
+        const mid = first + (last - first) / 2;
+        if (arr[mid] > val) {
+            last = mid;
         } else {
-            start = mid + 1;
+            first = mid + 1;
         }
     }
-    return start;
+    return if (arr[first] > val) first else arr.len;
 }
 
 pub fn main() !void {
