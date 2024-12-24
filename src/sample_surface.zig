@@ -166,6 +166,14 @@ pub fn Triangle(vec_def: Vec_Def) type {
             const ac = self.c().__sub__(self.a());
             return V_Type.__num_div__(ab.cross(ac).calc_mag(), V_Type.__num_from_int__(2));
         }
+        /// Sample triangle using standard barycentric formula:
+        /// u * A + v * B + (1 - u - v) * C
+        pub fn at_standard_uv(self: Self, u: T, v: T) V_Type {
+            const ca = self.a().__sub__(self.c());
+            const cb = self.b().__sub__(self.c());
+            // Simplified from the standard formula
+            return ca.__mul_s__(u).__add__(cb.__mul_s__(v)).__add__(self.c());
+        }
     };
 }
 
@@ -345,10 +353,7 @@ pub fn main() !void {
         const su0 = std.math.sqrt(iu[0]);
         const u = T_Type.V_Type.__num_sub__(T_Type.V_Type.__num_from_int__(1), su0);
         const v = T_Type.V_Type.__num_mul__(iu[1], su0);
-
-        const ca = t.a().__sub__(t.c());
-        const cb = t.b().__sub__(t.c());
-        const p = ca.__mul_s__(u).__add__(cb.__mul_s__(v)).__add__(t.c());
+        const p = t.at_standard_uv(u, v);
 
         try output_ply_bw_w.writeInt(u32, @bitCast(p.x()), .little);
         try output_ply_bw_w.writeInt(u32, @bitCast(p.y()), .little);
