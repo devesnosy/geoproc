@@ -17,13 +17,37 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const lib = b.addStaticLibrary(.{
+    const lib_vec = b.addStaticLibrary(.{
         .name = "vec",
         .root_source_file = b.path("src/vec.zig"),
         .target = target,
         .optimize = optimize,
     });
-    b.installArtifact(lib);
+    b.installArtifact(lib_vec);
+
+    const lib_triangle = b.addStaticLibrary(.{
+        .name = "triangle",
+        .root_source_file = b.path("src/triangle.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(lib_triangle);
+
+    const lib_aabb = b.addStaticLibrary(.{
+        .name = "aabb",
+        .root_source_file = b.path("src/aabb.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(lib_aabb);
+
+    const lib_mat = b.addStaticLibrary(.{
+        .name = "mat",
+        .root_source_file = b.path("src/mat.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(lib_mat);
 
     const exe = b.addExecutable(.{
         .name = "sample_surface",
