@@ -38,9 +38,11 @@ pub fn Vec(vec_def: Vec_Def) type {
         pub const __num_lt__ = if (is_builtin_num_type) __builtin_num_lt__ else T.__lt__;
         pub fn __num_max__(a: T, b: T) T {
             if (__num_gt__(a, b)) return a;
+            return b;
         }
         pub fn __num_min__(a: T, b: T) T {
             if (__num_lt__(a, b)) return a;
+            return b;
         }
         components: [N]T,
         fn __builtin_num_add__(a: T, b: T) T {
