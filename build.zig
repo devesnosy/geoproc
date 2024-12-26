@@ -41,6 +41,14 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(lib_aabb);
 
+    const lib_stl_read = b.addStaticLibrary(.{
+        .name = "stl_read",
+        .root_source_file = b.path("src/stl_read.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(lib_stl_read);
+
     const lib_mat = b.addStaticLibrary(.{
         .name = "mat",
         .root_source_file = b.path("src/mat.zig"),
