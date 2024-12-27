@@ -16,7 +16,7 @@ const lib_vec = @import("vec.zig");
 const lib_triangle = @import("triangle.zig");
 const lib_stl_read = @import("stl_read.zig");
 
-const GPA = std.heap.GeneralPurposeAllocator;
+const GPA = std.heap.GeneralPurposeAllocator(.{});
 const T_Type = lib_stl_read.T_Type;
 
 /// Return first element in array that is larger than val
@@ -36,7 +36,7 @@ fn upper_bound(comptime T: type, arr: []const T, val: T) usize {
 }
 
 pub fn main() !void {
-    var gpa = GPA(.{}).init;
+    var gpa = GPA.init;
     defer {
         const gpa_deinit_res = gpa.deinit();
         std.debug.assert(gpa_deinit_res == .ok);
