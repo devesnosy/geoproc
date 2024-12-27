@@ -32,6 +32,7 @@ fn upper_bound(comptime T: type, arr: []const T, val: T) usize {
             first = mid + 1;
         }
     }
+    std.debug.assert(first == last);
     return if (arr[first] > val) first else arr.len;
 }
 
