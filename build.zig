@@ -41,6 +41,14 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(lib_aabb);
 
+    const lib_aabb_tree = b.addExecutable(.{
+        .name = "aabb_tree",
+        .root_source_file = b.path("src/aabb_tree.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(lib_aabb_tree);
+
     const lib_stl_read = b.addStaticLibrary(.{
         .name = "stl_read",
         .root_source_file = b.path("src/stl_read.zig"),

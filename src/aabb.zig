@@ -15,8 +15,15 @@ const lib_vec = @import("vec.zig");
 
 pub fn AABB(vec_def: lib_vec.Vec_Def) type {
     return struct {
+        const Self = @This();
         const V_Type = lib_vec.Vec(vec_def);
         lower: V_Type,
         upper: V_Type,
+        pub fn calc_extent(self: Self) V_Type {
+            return self.upper.__sub__(self.lower);
+        }
+        pub fn calc_center(self: Self) V_Type {
+            return self.upper.__add__(self.lower).__div_si__(2);
+        }
     };
 }

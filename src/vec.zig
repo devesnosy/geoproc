@@ -158,6 +158,9 @@ pub fn Vec(vec_def: Vec_Def) type {
         pub fn z(self: Self) T {
             return self.components[2];
         }
+        pub fn at(self: Self, i: usize) T {
+            return self.components[i];
+        }
         pub fn calc_mag(self: Self) T {
             return std.math.sqrt(self.dot(self));
         }
