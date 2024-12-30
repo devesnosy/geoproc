@@ -122,7 +122,7 @@ pub fn Vec(vec_def: Vec_Def) type {
         pub fn __div_s__(self: Self, other: T) Self {
             return self.binary_scalar_op(other, __num_div__);
         }
-        pub fn __div_si__(self: Self, other: T) Self {
+        pub fn __div_si__(self: Self, other: i32) Self {
             return self.__div_s__(__num_from_int__(other));
         }
         const CP_Type = switch (N) {
