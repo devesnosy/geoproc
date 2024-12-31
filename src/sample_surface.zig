@@ -121,3 +121,13 @@ pub fn main() !void {
         try output_ply_bw_w.writeInt(u32, @bitCast(p.z()), .little);
     }
 }
+
+test "upper_bound" {
+    const N: usize = 1682001; // Arbitrary
+    var nums: [N]usize = undefined;
+    for (0..N) |i| nums[i] = i;
+    for (0..N) |i| {
+        const ub = upper_bound(usize, &nums, i);
+        try std.testing.expect(ub == (i + 1));
+    }
+}
