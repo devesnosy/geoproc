@@ -65,15 +65,15 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(lib_mat);
 
-    const exe = b.addExecutable(.{
+    const exe_sample_surface = b.addExecutable(.{
         .name = "sample_surface",
         .root_source_file = b.path("src/sample_surface.zig"),
         .target = target,
         .optimize = optimize,
     });
-    b.installArtifact(exe);
+    b.installArtifact(exe_sample_surface);
 
-    const run_cmd = b.addRunArtifact(exe);
+    const run_cmd = b.addRunArtifact(exe_sample_surface);
     run_cmd.step.dependOn(b.getInstallStep());
 
     if (b.args) |args| {
@@ -83,21 +83,21 @@ pub fn build(b: *std.Build) void {
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
 
-    const lib_unit_tests = b.addTest(.{
+    const lib_vec_unit_tests = b.addTest(.{
         .root_source_file = b.path("src/vec.zig"),
         .target = target,
         .optimize = optimize,
     });
+    const run_lib_vec_unit_tests = b.addRunArtifact(lib_vec_unit_tests);
 
-    const run_lib_unit_tests = b.addRunArtifact(lib_unit_tests);
-    const exe_unit_tests = b.addTest(.{
+    const exe_sample_surface_unit_tests = b.addTest(.{
         .root_source_file = b.path("src/sample_surface.zig"),
         .target = target,
         .optimize = optimize,
     });
-    const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
+    const run_exe_sample_surface_unit_tests = b.addRunArtifact(exe_sample_surface_unit_tests);
 
     const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_lib_unit_tests.step);
-    test_step.dependOn(&run_exe_unit_tests.step);
+    test_step.dependOn(&run_lib_vec_unit_tests.step);
+    test_step.dependOn(&run_exe_sample_surface_unit_tests.step);
 }
