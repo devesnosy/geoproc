@@ -22,11 +22,11 @@ const AABB3f = lib_aabb.AABB(vec_def);
 
 const AABB_Tree_Node = struct {
     const Self = @This();
-    aabb: AABB3f = undefined,
+    aabb: AABB3f,
     first: usize,
     last: usize,
-    left: ?*Self = null,
-    right: ?*Self = null,
+    left: ?*Self,
+    right: ?*Self,
     pub fn is_leaf(self: Self) bool {
         return self.left == null and self.right == null;
     }
