@@ -146,23 +146,23 @@ pub fn main() !void {
 
     const num_points = 1000;
 
-    var points = std.ArrayList(Vec3f).init(ator);
-    defer points.deinit();
-    try points.ensureUnusedCapacity(num_points);
+    var points = try ator.alloc(Vec3f, num_points);
+    defer ator.free(points);
 
-    for (0..num_points) |_| {
-        try points.append(.{
+    for (0..num_points) |i| {
+        points[i] =
+            .{
             .components = .{
                 rand.float(f32),
                 rand.float(f32),
                 rand.float(f32),
             },
-        });
+        };
     }
 
     var tree = AABB_Tree.init(ator);
     defer tree.deinit() catch {
         std.debug.print("Failed to free tree\n", .{});
     };
-    try tree.from_points(points.items);
+    try tree.from_points(points);
 }
