@@ -35,6 +35,104 @@ const AABB_Tree_Node = struct {
     }
 };
 
+const AABB_Tree = struct {
+    const Self = @This();
+    root: ?*AABB_Tree_Node,
+    ator: std.mem.Allocator,
+
+    pub fn init(ator: std.mem.Allocator) Self {
+        return .{ .root = null, .ator = ator };
+    }
+
+    pub fn from_points(self: *Self, points: []Vec3f) !void {
+        var stack = std.ArrayList(*AABB_Tree_Node).init(self.ator);
+        defer stack.deinit();
+
+        var root = try self.ator.create(AABB_Tree_Node);
+        root.aabb = undefined;
+        root.first = 0;
+        root.last = points.len - 1;
+        root.left = null;
+        root.right = null;
+
+        var ator = &self.ator;
+
+        self.root = root;
+
+        try stack.append(root);
+        outer: while (stack.items.len > 0) {
+            var node = stack.pop();
+            node.aabb = blk: {
+                var upper = points[0];
+                var lower = upper;
+                for (points[1..]) |p| {
+                    upper = upper.max(p);
+                    lower = lower.min(p);
+                }
+                break :blk .{ .upper = upper, .lower = lower };
+            };
+            if (node.num_prims() < 2) continue;
+            const extent = node.aabb.calc_extent();
+            const split_axis = blk: {
+                var i: usize = 0;
+                for (extent.components, 0..) |c, ci| {
+                    if (Vec3f.__num_gt__(c, extent.at(i))) i = ci;
+                }
+                break :blk i;
+            };
+            const split_value = node.aabb.calc_center().at(split_axis);
+            var first = node.first;
+            var last = node.last;
+            while (first < last) {
+                if (points[first].at(split_axis) < split_value) {
+                    first += 1;
+                } else {
+                    std.mem.swap(Vec3f, &points[first], &points[last]);
+                    last -= 1;
+                }
+            }
+            std.debug.assert(first == last);
+            var partition_point = first;
+            if (points[partition_point].at(split_axis) < split_value) {
+                if (partition_point == node.last) continue :outer;
+            } else {
+                if (partition_point == node.first) continue :outer;
+                partition_point -= 1;
+            }
+
+            var left = try ator.create(AABB_Tree_Node);
+            left.aabb = undefined;
+            left.first = node.first;
+            left.last = partition_point;
+            left.left = null;
+            left.right = null;
+
+            var right = try ator.create(AABB_Tree_Node);
+            right.aabb = undefined;
+            right.first = partition_point + 1;
+            right.last = node.last;
+            right.left = null;
+            right.right = null;
+
+            try stack.appendSlice(&.{ left, right });
+            node.left = left;
+            node.right = right;
+        }
+    }
+
+    pub fn deinit(self: *Self) !void {
+        if (self.root == null) return;
+        var stack = std.ArrayList(*AABB_Tree_Node).init(self.ator);
+        defer stack.deinit();
+        try stack.append(self.root.?);
+        while (stack.items.len > 0) {
+            var node = stack.pop();
+            if (!node.is_leaf()) try stack.appendSlice(&.{ node.left.?, node.right.? });
+            self.ator.destroy(node);
+        }
+    }
+};
+
 pub fn main() !void {
     var gpa = GPA.init;
     defer {
@@ -62,84 +160,9 @@ pub fn main() !void {
         });
     }
 
-    var root = try ator.create(AABB_Tree_Node);
-    root.aabb = undefined;
-    root.first = 0;
-    root.last = points.items.len - 1;
-    root.left = null;
-    root.right = null;
-
-    var stack = std.ArrayList(*AABB_Tree_Node).init(ator);
-    defer stack.deinit();
-
-    // Build tree
-
-    try stack.append(root);
-    outer: while (stack.items.len > 0) {
-        var node = stack.pop();
-        node.aabb = blk: {
-            var upper = points.items[0];
-            var lower = upper;
-            for (points.items[1..]) |p| {
-                upper = upper.max(p);
-                lower = lower.min(p);
-            }
-            break :blk .{ .upper = upper, .lower = lower };
-        };
-        if (node.num_prims() < 2) continue;
-        const extent = node.aabb.calc_extent();
-        const split_axis = blk: {
-            var i: usize = 0;
-            for (extent.components, 0..) |c, ci| {
-                if (Vec3f.__num_gt__(c, extent.at(i))) i = ci;
-            }
-            break :blk i;
-        };
-        const split_value = node.aabb.calc_center().at(split_axis);
-        var first = node.first;
-        var last = node.last;
-        while (first < last) {
-            if (points.items[first].at(split_axis) < split_value) {
-                first += 1;
-            } else {
-                std.mem.swap(Vec3f, &points.items[first], &points.items[last]);
-                last -= 1;
-            }
-        }
-        std.debug.assert(first == last);
-        var partition_point = first;
-        if (points.items[partition_point].at(split_axis) < split_value) {
-            if (partition_point == node.last) continue :outer;
-        } else {
-            if (partition_point == node.first) continue :outer;
-            partition_point -= 1;
-        }
-
-        var left = try ator.create(AABB_Tree_Node);
-        left.aabb = undefined;
-        left.first = node.first;
-        left.last = partition_point;
-        left.left = null;
-        left.right = null;
-
-        var right = try ator.create(AABB_Tree_Node);
-        right.aabb = undefined;
-        right.first = partition_point + 1;
-        right.last = node.last;
-        right.left = null;
-        right.right = null;
-
-        try stack.appendSlice(&.{ left, right });
-        node.left = left;
-        node.right = right;
-    }
-
-    // Free tree
-
-    try stack.append(root);
-    while (stack.items.len > 0) {
-        var node = stack.pop();
-        if (!node.is_leaf()) try stack.appendSlice(&.{ node.left.?, node.right.? });
-        ator.destroy(node);
-    }
+    var tree = AABB_Tree.init(ator);
+    defer tree.deinit() catch {
+        std.debug.print("Failed to free tree\n", .{});
+    };
+    try tree.from_points(points.items);
 }
