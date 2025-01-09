@@ -67,7 +67,7 @@ pub fn stl_read(ator: std.mem.Allocator, filepath: []const u8) !std.ArrayList(T_
         outer: while (true) {
             read_token(input_mesh_br_r, &token) catch break :outer;
             if (std.mem.eql(u8, token.items, "loop")) {
-                var t: T_Type = .{ .vertices = undefined };
+                var t: T_Type = undefined;
                 for (0..3) |vi| {
                     // read "vertex"
                     read_token(input_mesh_br_r, &token) catch break :outer;
