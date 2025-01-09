@@ -67,7 +67,7 @@ pub fn Vec(vec_def: Vec_Def) type {
             for (0..N) |i| result.components[i] = op(self.components[i], other.components[i]);
             return result;
         }
-        pub fn binary_scalar_op(self: Self, other: T, op: fn (T, T) T) Self {
+        pub fn binary_op_s(self: Self, other: T, op: fn (T, T) T) Self {
             var result: Self = .{ .components = undefined };
             for (0..N) |i| result.components[i] = op(self.components[i], other);
             return result;
@@ -107,13 +107,13 @@ pub fn Vec(vec_def: Vec_Def) type {
             return self.binary_op(other, __num_mul__).sum();
         }
         pub fn __mul_s__(self: Self, other: T) Self {
-            return self.binary_scalar_op(other, __num_mul__);
+            return self.binary_op_s(other, __num_mul__);
         }
         pub fn __mul_si__(self: Self, other: i32) Self {
             return self.__mul_s__(__num_from_int__(other));
         }
         pub fn __div_s__(self: Self, other: T) Self {
-            return self.binary_scalar_op(other, __num_div__);
+            return self.binary_op_s(other, __num_div__);
         }
         pub fn __div_si__(self: Self, other: i32) Self {
             return self.__div_s__(__num_from_int__(other));
