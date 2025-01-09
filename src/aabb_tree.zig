@@ -63,9 +63,9 @@ const AABB_Tree = struct {
         outer: while (stack.items.len > 0) {
             var node = stack.pop();
             node.aabb = blk: {
-                var upper = points[0];
+                var upper = points[node.first];
                 var lower = upper;
-                for (points[1..]) |p| {
+                for (points[node.first + 1 .. node.last + 1]) |p| {
                     upper = upper.max(p);
                     lower = lower.min(p);
                 }
