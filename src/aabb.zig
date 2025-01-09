@@ -25,5 +25,11 @@ pub fn AABB(vec_def: lib_vec.Vec_Def) type {
         pub fn calc_center(self: Self) V_Type {
             return self.upper.__add__(self.lower).__div_si__(2);
         }
+        pub fn join(self: Self, other: Self) Self {
+            return .{
+                .lower = self.lower.min(other.lower),
+                .upper = self.upper.max(other.upper),
+            };
+        }
     };
 }

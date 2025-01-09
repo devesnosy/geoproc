@@ -45,9 +45,13 @@ const AABB_Tree = struct {
         return .{ .root = null, .ator = ator, .indices = undefined };
     }
 
-    pub fn from_points(self: *Self, points: []const Vec3f) !void {
+    pub fn from_aabbs(self: *Self, aabbs: []const AABB3f) !void {
         var ator = &self.ator;
-        const num_prims = points.len;
+        const num_prims = aabbs.len;
+
+        var aabb_centers = try ator.alloc(Vec3f, num_prims);
+        defer ator.free(aabb_centers);
+        for (0..num_prims) |i| aabb_centers[i] = aabbs[i].calc_center();
 
         self.indices = try ator.alloc(usize, num_prims);
         for (0..num_prims) |i| self.indices[i] = i;
@@ -69,14 +73,10 @@ const AABB_Tree = struct {
         outer: while (stack.items.len > 0) {
             var node = stack.pop();
             node.aabb = blk: {
-                var upper = points[indices[node.first]];
-                var lower = upper;
-                for (indices[node.first + 1 .. node.last + 1]) |i| {
-                    const p = points[i];
-                    upper = upper.max(p);
-                    lower = lower.min(p);
-                }
-                break :blk .{ .upper = upper, .lower = lower };
+                var result = aabbs[indices[node.first]];
+                for (indices[node.first + 1 .. node.last + 1]) |i|
+                    result = result.join(aabbs[i]);
+                break :blk result;
             };
             if (node.num_prims() < 2) continue;
             const extent = node.aabb.calc_extent();
@@ -91,7 +91,7 @@ const AABB_Tree = struct {
             var first = node.first;
             var last = node.last;
             while (first < last) {
-                if (points[indices[first]].at(split_axis) < split_value) {
+                if (aabb_centers[indices[first]].at(split_axis) < split_value) {
                     first += 1;
                 } else {
                     std.mem.swap(usize, &indices[first], &indices[last]);
@@ -100,7 +100,7 @@ const AABB_Tree = struct {
             }
             std.debug.assert(first == last);
             var partition_point = first;
-            if (points[indices[partition_point]].at(split_axis) < split_value) {
+            if (aabb_centers[indices[partition_point]].at(split_axis) < split_value) {
                 if (partition_point == node.last) continue :outer;
             } else {
                 if (partition_point == node.first) continue :outer;
@@ -172,5 +172,10 @@ pub fn main() !void {
     defer tree.deinit() catch {
         std.debug.print("Failed to free tree\n", .{});
     };
-    try tree.from_points(points);
+    var aabbs = try ator.alloc(AABB3f, num_points);
+    defer ator.free(aabbs);
+    for (points, 0..) |p, i| {
+        aabbs[i] = .{ .lower = p, .upper = p };
+    }
+    try tree.from_aabbs(aabbs);
 }
