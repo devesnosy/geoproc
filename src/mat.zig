@@ -15,6 +15,14 @@ const lib_vec = @import("vec.zig");
 
 pub fn Mat(comptime T: type, comptime NRows: usize, comptime NCols: usize) type {
     return struct {
-        rows: [NRows]lib_vec.Vec(.{ .T = T, .N = NCols }),
+        const Self = @This();
+        const Row_Type = lib_vec.Vec(.{ .T = T, .N = NCols });
+        rows: [NRows]Row_Type,
+
+        pub fn transform_vec(self: Self, v: Row_Type) Row_Type {
+            var result: Row_Type = undefined;
+            for (0..NRows) |i| result[i] = self.rows[i].dot(v);
+            return result;
+        }
     };
 }
