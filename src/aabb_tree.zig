@@ -39,33 +39,40 @@ const AABB_Tree = struct {
     const Self = @This();
     root: ?*AABB_Tree_Node,
     ator: std.mem.Allocator,
+    indices: []usize,
 
     pub fn init(ator: std.mem.Allocator) Self {
-        return .{ .root = null, .ator = ator };
+        return .{ .root = null, .ator = ator, .indices = undefined };
     }
 
-    pub fn from_points(self: *Self, points: []Vec3f) !void {
+    pub fn from_points(self: *Self, points: []const Vec3f) !void {
+        var ator = &self.ator;
+        const num_prims = points.len;
+
+        self.indices = try ator.alloc(usize, num_prims);
+        for (0..num_prims) |i| self.indices[i] = i;
+
         var stack = std.ArrayList(*AABB_Tree_Node).init(self.ator);
         defer stack.deinit();
 
         var root = try self.ator.create(AABB_Tree_Node);
         root.aabb = undefined;
         root.first = 0;
-        root.last = points.len - 1;
+        root.last = num_prims - 1;
         root.left = null;
         root.right = null;
 
-        var ator = &self.ator;
-
         self.root = root;
+        var indices = self.indices;
 
         try stack.append(root);
         outer: while (stack.items.len > 0) {
             var node = stack.pop();
             node.aabb = blk: {
-                var upper = points[node.first];
+                var upper = points[indices[node.first]];
                 var lower = upper;
-                for (points[node.first + 1 .. node.last + 1]) |p| {
+                for (indices[node.first + 1 .. node.last + 1]) |i| {
+                    const p = points[i];
                     upper = upper.max(p);
                     lower = lower.min(p);
                 }
@@ -84,16 +91,16 @@ const AABB_Tree = struct {
             var first = node.first;
             var last = node.last;
             while (first < last) {
-                if (points[first].at(split_axis) < split_value) {
+                if (points[indices[first]].at(split_axis) < split_value) {
                     first += 1;
                 } else {
-                    std.mem.swap(Vec3f, &points[first], &points[last]);
+                    std.mem.swap(usize, &indices[first], &indices[last]);
                     last -= 1;
                 }
             }
             std.debug.assert(first == last);
             var partition_point = first;
-            if (points[partition_point].at(split_axis) < split_value) {
+            if (points[indices[partition_point]].at(split_axis) < split_value) {
                 if (partition_point == node.last) continue :outer;
             } else {
                 if (partition_point == node.first) continue :outer;
@@ -122,6 +129,7 @@ const AABB_Tree = struct {
 
     pub fn deinit(self: *Self) !void {
         if (self.root == null) return;
+        self.ator.free(self.indices);
         var stack = std.ArrayList(*AABB_Tree_Node).init(self.ator);
         defer stack.deinit();
         try stack.append(self.root.?);
