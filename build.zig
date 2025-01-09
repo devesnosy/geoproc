@@ -13,91 +13,49 @@
 
 const std = @import("std");
 
+fn create_test(b: *std.Build, test_step: *std.Build.Step, src: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
+    const exe_test = b.addTest(.{
+        .root_source_file = b.path(src),
+        .target = target,
+        .optimize = optimize,
+    });
+    const run_exe_test = b.addRunArtifact(exe_test);
+    test_step.dependOn(&run_exe_test.step);
+}
+
+fn create_lib(b: *std.Build, test_step: *std.Build.Step, name: []const u8, src: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
+    const lib = b.addStaticLibrary(.{
+        .name = name,
+        .root_source_file = b.path(src),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(lib);
+    create_test(b, test_step, src, target, optimize);
+}
+
+fn create_exe(b: *std.Build, test_step: *std.Build.Step, name: []const u8, src: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
+    const exe = b.addExecutable(.{
+        .name = name,
+        .root_source_file = b.path(src),
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(exe);
+    create_test(b, test_step, src, target, optimize);
+}
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-
-    const lib_vec = b.addStaticLibrary(.{
-        .name = "vec",
-        .root_source_file = b.path("src/vec.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(lib_vec);
-
-    const lib_triangle = b.addStaticLibrary(.{
-        .name = "triangle",
-        .root_source_file = b.path("src/triangle.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(lib_triangle);
-
-    const lib_aabb = b.addStaticLibrary(.{
-        .name = "aabb",
-        .root_source_file = b.path("src/aabb.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(lib_aabb);
-
-    const lib_aabb_tree = b.addExecutable(.{
-        .name = "aabb_tree",
-        .root_source_file = b.path("src/aabb_tree.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(lib_aabb_tree);
-
-    const lib_stl_read = b.addStaticLibrary(.{
-        .name = "stl_read",
-        .root_source_file = b.path("src/stl_read.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(lib_stl_read);
-
-    const lib_mat = b.addStaticLibrary(.{
-        .name = "mat",
-        .root_source_file = b.path("src/mat.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(lib_mat);
-
-    const exe_sample_surface = b.addExecutable(.{
-        .name = "sample_surface",
-        .root_source_file = b.path("src/sample_surface.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(exe_sample_surface);
-
-    const run_cmd = b.addRunArtifact(exe_sample_surface);
-    run_cmd.step.dependOn(b.getInstallStep());
-
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-    }
-
-    const run_step = b.step("run", "Run the app");
-    run_step.dependOn(&run_cmd.step);
-
-    const lib_vec_unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/vec.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    const run_lib_vec_unit_tests = b.addRunArtifact(lib_vec_unit_tests);
-
-    const exe_sample_surface_unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/sample_surface.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    const run_exe_sample_surface_unit_tests = b.addRunArtifact(exe_sample_surface_unit_tests);
-
     const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_lib_vec_unit_tests.step);
-    test_step.dependOn(&run_exe_sample_surface_unit_tests.step);
+
+    create_lib(b, test_step, "vec", "src/vec.zig", target, optimize);
+    create_lib(b, test_step, "triangle", "src/triangle.zig", target, optimize);
+    create_lib(b, test_step, "aabb", "src/aabb.zig", target, optimize);
+    create_lib(b, test_step, "stl_read", "src/stl_read.zig", target, optimize);
+    create_lib(b, test_step, "mat", "src/mat.zig", target, optimize);
+
+    create_exe(b, test_step, "aabb_tree", "src/aabb_tree.zig", target, optimize);
+    create_exe(b, test_step, "sample_surface", "src/sample_surface.zig", target, optimize);
 }
