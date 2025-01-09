@@ -21,19 +21,14 @@ pub fn Vec(vec_def: Vec_Def) type {
         const N = vec_def.N;
         const Self = @This();
         const T_Info = @typeInfo(T);
-        const is_builtin_num_type = switch (T_Info) {
-            .int, .float, .comptime_int, .comptime_float => true,
-            else => false,
-        };
+        const is_built_in_float = (T_Info == .float or T_Info == .comptime_float);
+        const is_built_in_int = (T_Info == .int or T_Info == .comptime_int);
+        const is_builtin_num_type = is_built_in_int or is_built_in_float;
         pub const __num_add__ = if (is_builtin_num_type) __builtin_num_add__ else T.__add__;
         pub const __num_sub__ = if (is_builtin_num_type) __builtin_num_sub__ else T.__sub__;
         pub const __num_mul__ = if (is_builtin_num_type) __builtin_num_mul__ else T.__mul__;
         pub const __num_div__ = if (is_builtin_num_type) __builtin_num_div__ else T.__div__;
-        pub const __num_from_int__ = switch (T_Info) {
-            .int, .comptime_int => __builtin_int_from_int__,
-            .float, .comptime_float => __builtin_float_from_int__,
-            else => T.__from_int__,
-        };
+        pub const __num_from_int__ = if (is_built_in_float) __builtin_float_from_int__ else if (is_built_in_int) __builtin_int_from_int__ else T.__from_int__;
         pub const __num_gt__ = if (is_builtin_num_type) __builtin_num_gt__ else T.__gt__;
         pub const __num_lt__ = if (is_builtin_num_type) __builtin_num_lt__ else T.__lt__;
         pub fn __num_max__(a: T, b: T) T {
