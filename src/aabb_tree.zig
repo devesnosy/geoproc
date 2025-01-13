@@ -143,10 +143,7 @@ const AABB_Tree = struct {
 
 pub fn main() !void {
     var gpa = GPA.init;
-    defer {
-        const gpa_deinit_res = gpa.deinit();
-        std.debug.assert(gpa_deinit_res == .ok);
-    }
+    defer gpa.deinit();
     const ator = gpa.allocator();
 
     var prng = std.Random.DefaultPrng.init(0);

@@ -1,7 +1,7 @@
 .{
     .name = "geoproc",
     .version = "0.0.1",
-    .minimum_zig_version = "0.14.0-dev.2546+0ff0bdb4a",
+    .minimum_zig_version = "0.14.0-dev.2639+15fe99957",
     .paths = .{
         "build.zig",
         "build.zig.zon",
