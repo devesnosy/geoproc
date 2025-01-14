@@ -38,7 +38,7 @@ fn upper_bound(comptime T: type, arr: []const T, val: T) usize {
 
 pub fn main() !void {
     var gpa = GPA.init;
-    defer gpa.deinit();
+    defer _ = gpa.deinit();
 
     const ator = gpa.allocator();
     const args = try std.process.argsAlloc(ator);
