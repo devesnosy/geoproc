@@ -58,4 +58,5 @@ pub fn build(b: *std.Build) void {
 
     create_exe(b, test_step, "aabb_tree", "src/aabb_tree.zig", target, optimize);
     create_exe(b, test_step, "sample_surface", "src/sample_surface.zig", target, optimize);
+    create_exe(b, test_step, "parse_ttf", "src/parse_ttf.zig", target, optimize);
 }
