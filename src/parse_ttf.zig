@@ -42,9 +42,10 @@ const File_BR = struct {
     __private_file__: std.fs.File,
     __private_buffered_reader__: Buffered_Reader_Type,
     pub fn init(file: std.fs.File) !File_BR {
-        const file_reder = file.reader();
-        const buffered_reader = std.io.bufferedReader(file_reder);
-        return .{ .__private_file__ = file, .__private_buffered_reader__ = buffered_reader };
+        return .{
+            .__private_file__ = file,
+            .__private_buffered_reader__ = .{ .unbuffered_reader = file.reader() },
+        };
     }
     pub fn reader(self: *File_BR) Buffered_Reader_Type.Reader {
         return self.__private_buffered_reader__.reader();
@@ -158,6 +159,8 @@ pub fn main() !void {
     const glyph_ids_num_bytes = cmap_subtable_length - 8 * (segment_count + 2);
     const glyph_ids_num_items = glyph_ids_num_bytes / 2;
     var glyph_ids = try ator.alloc(u16, glyph_ids_num_items);
+    defer ator.free(glyph_ids);
+
     for (0..glyph_ids_num_items) |i| {
         glyph_ids[i] = try reader.readInt(u16, .big);
     }
