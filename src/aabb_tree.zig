@@ -71,7 +71,7 @@ const AABB_Tree = struct {
 
         try stack.append(root);
         outer: while (stack.items.len > 0) {
-            var node = stack.pop();
+            var node = stack.pop().?;
             node.aabb = blk: {
                 var result = aabbs[indices[node.first]];
                 for (indices[node.first + 1 .. node.last + 1]) |i|
@@ -134,7 +134,7 @@ const AABB_Tree = struct {
         defer stack.deinit();
         try stack.append(self.root.?);
         while (stack.items.len > 0) {
-            var node = stack.pop();
+            var node = stack.pop().?;
             if (!node.is_leaf()) try stack.appendSlice(&.{ node.left.?, node.right.? });
             self.ator.destroy(node);
         }
@@ -157,12 +157,12 @@ pub fn main() !void {
     for (0..num_points) |i| {
         points[i] =
             .{
-            .components = .{
-                rand.float(f32),
-                rand.float(f32),
-                rand.float(f32),
-            },
-        };
+                .components = .{
+                    rand.float(f32),
+                    rand.float(f32),
+                    rand.float(f32),
+                },
+            };
     }
 
     var tree = AABB_Tree.init(ator);

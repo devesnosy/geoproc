@@ -1,7 +1,7 @@
 .{
-    .name = "geoproc",
+    .name = .geoproc,
+    .fingerprint = 0x9ab2884899369851,
     .version = "0.0.1",
-    .minimum_zig_version = "0.14.0-dev.2639+15fe99957",
     .paths = .{
         "build.zig",
         "build.zig.zon",
