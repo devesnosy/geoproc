@@ -67,7 +67,7 @@ pub fn stl_read(ator: std.mem.Allocator, filepath: []const u8) !std.ArrayList(T_
         outer: while (true) {
             read_token(input_mesh_br_r, &token) catch break :outer;
             if (std.mem.eql(u8, token.items, "loop")) {
-                var t: T_Type = undefined;
+                var t = try tris.addOne();
                 for (0..3) |vi| {
                     // read "vertex"
                     read_token(input_mesh_br_r, &token) catch break :outer;
@@ -77,7 +77,6 @@ pub fn stl_read(ator: std.mem.Allocator, filepath: []const u8) !std.ArrayList(T_
                         t.vertices[vi].components[ci] = c;
                     }
                 }
-                try tris.append(t);
             }
         }
     }
