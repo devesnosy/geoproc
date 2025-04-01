@@ -53,7 +53,18 @@ pub fn stl_read(ator: std.mem.Allocator, filepath: []const u8) !std.ArrayList(T_
 
     if (expected_binary_size == file_size) {
         std.debug.print("Binary\n", .{});
-        std.debug.print("TODO: Implement binary .stl reader\n", .{});
+        try tris.ensureTotalCapacity(num_tris);
+        outer: for (0..num_tris) |_| {
+            input_mesh_br_r.skipBytes(12, .{}) catch break;
+            var t: T_Type = undefined;
+            for (0..3) |vi| {
+                for (0..3) |ci| {
+                    t.vertices[vi].components[ci] = @bitCast(input_mesh_br_r.readInt(i32, .little) catch break :outer);
+                }
+            }
+            tris.appendAssumeCapacity(t);
+            input_mesh_br_r.skipBytes(2, .{}) catch break;
+        }
     } else {
         std.debug.print("ASCII\n", .{});
         try input_mesh_file.seekTo(0);
