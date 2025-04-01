@@ -31,6 +31,7 @@ pub fn Vec(vec_def: Vec_Def) type {
         pub const __num_from_int__ = if (is_builtin_num_type) __builtin_num_from_int__ else T.__from_int__;
         pub const __num_gt__ = if (is_builtin_num_type) __builtin_num_gt__ else T.__gt__;
         pub const __num_lt__ = if (is_builtin_num_type) __builtin_num_lt__ else T.__lt__;
+        pub const __num_eq__ = if (is_builtin_num_type) __builtin_num_eq__ else T.__eq__;
         pub fn __num_max__(a: T, b: T) T {
             return if (__num_gt__(a, b)) a else b;
         }
@@ -59,6 +60,12 @@ pub fn Vec(vec_def: Vec_Def) type {
         }
         fn __builtin_num_lt__(a: T, b: T) bool {
             return a < b;
+        }
+        fn __builtin_num_eq__(a: T, b: T) bool {
+            return a == b;
+        }
+        pub fn init(v: [N]T) Self {
+            return .{ .components = v };
         }
         pub fn binary_op(self: Self, other: Self, op: fn (T, T) T) Self {
             var result: Self = .{ .components = undefined };
