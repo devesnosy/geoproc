@@ -41,8 +41,6 @@ pub fn stl_read(ator: std.mem.Allocator, filepath: []const u8) !std.ArrayList(T_
     defer input_mesh_file.close();
 
     const input_mesh_r = input_mesh_file.reader();
-    var input_mesh_br = std.io.bufferedReader(input_mesh_r);
-    var input_mesh_br_r = input_mesh_br.reader();
 
     try input_mesh_r.skipBytes(80, .{});
     const num_tris = @as(u64, try input_mesh_r.readInt(u32, .little));
@@ -50,6 +48,8 @@ pub fn stl_read(ator: std.mem.Allocator, filepath: []const u8) !std.ArrayList(T_
     const file_size = try input_mesh_file.getEndPos();
 
     var tris = std.ArrayList(T_Type).init(ator);
+    var input_mesh_br = std.io.bufferedReader(input_mesh_r);
+    var input_mesh_br_r = input_mesh_br.reader();
 
     if (expected_binary_size == file_size) {
         std.debug.print("Binary\n", .{});
