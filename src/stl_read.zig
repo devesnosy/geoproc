@@ -76,7 +76,7 @@ pub fn stl_read(ator: std.mem.Allocator, filepath: []const u8) !std.ArrayList(T_
         defer token.deinit();
 
         outer: while (true) {
-            read_token(input_mesh_br_r, &token) catch break :outer;
+            read_token(input_mesh_br_r, &token) catch break;
             if (std.mem.eql(u8, token.items, "loop")) {
                 var t: T_Type = undefined;
                 for (0..3) |vi| {
