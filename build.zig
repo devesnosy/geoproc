@@ -23,17 +23,6 @@ fn create_test(b: *std.Build, test_step: *std.Build.Step, src: []const u8, targe
     test_step.dependOn(&run_exe_test.step);
 }
 
-fn create_lib(b: *std.Build, test_step: *std.Build.Step, name: []const u8, src: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
-    const lib = b.addStaticLibrary(.{
-        .name = name,
-        .root_source_file = b.path(src),
-        .target = target,
-        .optimize = optimize,
-    });
-    b.installArtifact(lib);
-    create_test(b, test_step, src, target, optimize);
-}
-
 fn create_exe(b: *std.Build, test_step: *std.Build.Step, name: []const u8, src: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
     const exe = b.addExecutable(.{
         .name = name,
@@ -49,12 +38,6 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const test_step = b.step("test", "Run unit tests");
-
-    create_lib(b, test_step, "vec", "src/vec.zig", target, optimize);
-    create_lib(b, test_step, "triangle", "src/triangle.zig", target, optimize);
-    create_lib(b, test_step, "aabb", "src/aabb.zig", target, optimize);
-    create_lib(b, test_step, "stl_read", "src/stl_read.zig", target, optimize);
-    create_lib(b, test_step, "mat", "src/mat.zig", target, optimize);
 
     create_exe(b, test_step, "aabb_tree", "src/aabb_tree.zig", target, optimize);
     create_exe(b, test_step, "sample_surface", "src/sample_surface.zig", target, optimize);
