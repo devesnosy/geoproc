@@ -13,8 +13,9 @@
 
 const std = @import("std");
 
-fn create_test(b: *std.Build, test_step: *std.Build.Step, src: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
+fn create_test(b: *std.Build, test_step: *std.Build.Step, name: []const u8, src: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void {
     const exe_test = b.addTest(.{
+        .name = name,
         .root_source_file = b.path(src),
         .target = target,
         .optimize = optimize,
@@ -31,7 +32,7 @@ fn create_exe(b: *std.Build, test_step: *std.Build.Step, name: []const u8, src: 
         .optimize = optimize,
     });
     b.installArtifact(exe);
-    create_test(b, test_step, src, target, optimize);
+    create_test(b, test_step, name, src, target, optimize);
 }
 
 pub fn build(b: *std.Build) void {
