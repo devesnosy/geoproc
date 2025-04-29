@@ -14,7 +14,7 @@
 const std = @import("std");
 const lib_vec = @import("vec.zig");
 const lib_triangle = @import("triangle.zig");
-const lib_stl_read = @import("stl_read.zig");
+const lib_stl_read = @import("read_stl.zig");
 
 const GPA = std.heap.GeneralPurposeAllocator(.{});
 const T_Type = lib_stl_read.T_Type;
